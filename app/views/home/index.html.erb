@@ -1,0 +1,6 @@
+<h1>Bienvenue</h1>
+
+<p>Email : <%= current_user.email %></p>
+<p>PIN : <%= current_user.pin %></p>
+
+<%= button_to "Déconnexion", destroy_user_session_path, method: :delete %>
