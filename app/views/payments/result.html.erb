@@ -1,0 +1,32 @@
+<h2>Résultat du paiement</h2>
+
+<table border="1" cellpadding="10">
+  <tr>
+    <th>Référence</th>
+    <td><%= @payment.reference %></td>
+  </tr>
+
+  <tr>
+    <th>Montant</th>
+    <td><%= @payment.amount %> FCFA</td>
+  </tr>
+
+  <tr>
+    <th>Statut</th>
+    <td><%= @payment.status %></td>
+  </tr>
+
+  <tr>
+    <th>Expéditeur</th>
+    <td><%= @payment.sender %></td>
+  </tr>
+
+  <tr>
+    <th>Destinataire</th>
+    <td><%= @payment.receiver %></td>
+  </tr>
+</table>
+
+<br>
+
+<%= link_to "Nouvelle recherche", payment_check_path %>

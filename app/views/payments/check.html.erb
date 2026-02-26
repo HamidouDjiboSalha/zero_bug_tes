@@ -1,0 +1,18 @@
+<h2>Vérification de paiement iMoney</h2>
+
+<%= form_with url: payment_check_path, method: :post, local: true do |f| %>
+
+  <div>
+    <label>Référence iMoney</label><br>
+    <%= text_field_tag :reference, nil, placeholder: "Ex: IMONEY1234", required: true %>
+  </div>
+
+  <br>
+
+  <%= submit_tag "Vérifier le paiement" %>
+
+<% end %>
+
+<% if flash[:alert] %>
+  <p style="color:red"><%= flash[:alert] %></p>
+<% end %>
