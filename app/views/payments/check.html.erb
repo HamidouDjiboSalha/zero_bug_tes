@@ -1,18 +1,331 @@
-<h2>Vérification de paiement iMoney</h2>
+<style>
+  :root {
+    --lime: #8dc63f;
+    --lime-dark: #6fa32e;
+    --lime-muted: #e8f5d0;
+    --charcoal: #1c1f26;
+  }
+  body { font-family: 'Outfit', sans-serif; }
 
-<%= form_with url: payment_check_path, method: :post, local: true do |f| %>
+  .payment-wrapper {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #f8faf5;
+    padding: 24px;
+  }
 
-  <div>
-    <label>Référence iMoney</label><br>
-    <%= text_field_tag :reference, nil, placeholder: "Ex: IMONEY1234", required: true %>
+  .payment-card {
+    background: white;
+    border-radius: 20px;
+    box-shadow: 0 4px 40px rgba(28,31,38,0.08);
+    width: 100%;
+    max-width: 440px;
+    overflow: hidden;
+  }
+
+  /* ── Header ── */
+  .card-header {
+    background: var(--charcoal);
+    padding: 28px 32px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+
+  .header-icon {
+    width: 46px; height: 46px;
+    background: var(--lime);
+    border-radius: 13px;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+
+  .header-icon svg { width: 24px; height: 24px; color: white; }
+
+  .card-header h2 {
+    color: white;
+    font-size: 17px;
+    font-weight: 700;
+    margin: 0;
+    letter-spacing: -0.3px;
+  }
+
+  .card-header p {
+    color: rgba(255,255,255,0.45);
+    font-size: 13px;
+    margin: 4px 0 0;
+  }
+
+  /* ── Body ── */
+  .card-body { padding: 30px 32px 28px; }
+
+  /* ── Alert ── */
+  .flash-alert {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    background: #fef2f2;
+    border: 1.5px solid #fca5a5;
+    border-radius: 11px;
+    padding: 12px 14px;
+    margin-bottom: 22px;
+    font-size: 13px;
+    color: #dc2626;
+    font-weight: 500;
+    line-height: 1.5;
+  }
+
+  .flash-alert svg { width: 16px; height: 16px; flex-shrink: 0; margin-top: 1px; }
+
+  /* ── Form ── */
+  .form-group { margin-bottom: 24px; }
+
+  .form-group label {
+    display: block;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--charcoal);
+    margin-bottom: 8px;
+  }
+
+  .input-wrap { position: relative; }
+
+  .input-prefix {
+    position: absolute;
+    left: 13px; top: 50%;
+    transform: translateY(-50%);
+    pointer-events: none;
+  }
+
+  .input-prefix svg { width: 16px; height: 16px; color: #9ca3af; display: block; }
+
+  .ref-input {
+    width: 100%;
+    padding: 12px 14px 12px 42px;
+    border: 1.5px solid #e5e7eb;
+    border-radius: 11px;
+    font-size: 14px;
+    font-family: 'Outfit', sans-serif;
+    font-weight: 600;
+    letter-spacing: 1px;
+    color: var(--charcoal);
+    background: #fafafa;
+    transition: border-color 0.15s, box-shadow 0.15s, background 0.15s;
+    box-sizing: border-box;
+    outline: none;
+    text-transform: uppercase;
+  }
+
+  .ref-input:focus {
+    border-color: var(--lime);
+    background: white;
+    box-shadow: 0 0 0 3px rgba(141,198,63,0.15);
+  }
+
+  .ref-input::placeholder { color: #c4c9d4; letter-spacing: 0; font-weight: 400; text-transform: none; }
+
+  .input-hint {
+    margin-top: 7px;
+    font-size: 12px;
+    color: #9ca3af;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
+
+  .input-hint svg { width: 13px; height: 13px; flex-shrink: 0; }
+
+  /* ── Example badge ── */
+  .example-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--lime-muted);
+    border: 1.5px solid var(--lime);
+    border-radius: 8px;
+    padding: 8px 13px;
+    font-size: 12.5px;
+    font-weight: 700;
+    color: var(--lime-dark);
+    letter-spacing: 1px;
+    margin-bottom: 22px;
+  }
+
+  .example-badge span { font-weight: 400; color: #6b7280; letter-spacing: 0; font-size: 12px; }
+
+  /* ── Submit ── */
+  .submit-btn {
+    width: 100%;
+    padding: 13px;
+    background: var(--lime);
+    color: white;
+    border: none;
+    border-radius: 12px;
+    font-size: 15px;
+    font-weight: 700;
+    font-family: 'Outfit', sans-serif;
+    cursor: pointer;
+    transition: background 0.15s, transform 0.1s, box-shadow 0.15s;
+    letter-spacing: 0.2px;
+    box-shadow: 0 4px 14px rgba(141,198,63,0.35);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 9px;
+  }
+
+  .submit-btn:hover {
+    background: var(--lime-dark);
+    box-shadow: 0 6px 20px rgba(141,198,63,0.4);
+    transform: translateY(-1px);
+  }
+
+  .submit-btn:active { transform: translateY(0); }
+  .submit-btn svg { width: 17px; height: 17px; }
+
+  /* ── Footer ── */
+  .card-footer {
+    padding: 16px 32px 20px;
+    border-top: 1px solid #f3f4f6;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+  }
+
+  .logo-mark {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    text-decoration: none;
+  }
+
+  .logo-i {
+    width: 26px; height: 26px;
+    background: var(--lime);
+    border-radius: 7px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 13px; font-weight: 700; color: white;
+  }
+
+  .logo-text { font-size: 16px; font-weight: 600; color: var(--charcoal); }
+  .logo-text em { color: var(--lime); font-style: normal; }
+
+  .secured-label {
+    font-size: 11px;
+    color: #9ca3af;
+    font-weight: 500;
+    margin-left: 6px;
+    padding-left: 10px;
+    border-left: 1px solid #e5e7eb;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+
+  .secured-label svg { width: 12px; height: 12px; color: var(--lime-dark); }
+</style>
+
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+<div class="payment-wrapper">
+  <div class="payment-card">
+
+    <!-- Header -->
+    <div class="card-header">
+      <div class="header-icon">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+            d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
+        </svg>
+      </div>
+      <div>
+        <h2>Vérification de paiement</h2>
+        <p>Entrez votre référence iMoney pour vérifier</p>
+      </div>
+    </div>
+
+    <!-- Body -->
+    <div class="card-body">
+
+      <!-- Flash alert -->
+      <% if flash[:alert].present? %>
+        <div class="flash-alert">
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M12 8v4m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/>
+          </svg>
+          <%= flash[:alert] %>
+        </div>
+      <% end %>
+
+      <!-- Example -->
+      <div class="example-badge">
+        IMONEY1234
+        <span>— exemple de référence</span>
+      </div>
+
+      <%= form_with url: payment_check_path, method: :post, local: true do |f| %>
+
+        <div class="form-group">
+          <label for="reference">Référence iMoney</label>
+          <div class="input-wrap">
+            <span class="input-prefix">
+              <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M7 20l4-16m2 16l4-16M6 9h14M4 15h14"/>
+              </svg>
+            </span>
+            <%= text_field_tag :reference, nil,
+                id: "reference",
+                placeholder: "Ex: IMONEY1234",
+                required: true,
+                class: "ref-input",
+                autocomplete: "off",
+                autofocus: true %>
+          </div>
+          <div class="input-hint">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+            </svg>
+            La référence se trouve sur votre reçu iMoney
+          </div>
+        </div>
+
+        <%= submit_tag "Vérifier le paiement", class: "submit-btn" %>
+
+      <% end %>
+    </div>
+
+    <!-- Footer -->
+    <div class="card-footer">
+      <div class="logo-mark">
+        <div class="logo-i">i</div>
+        <span class="logo-text"><em>i</em>money</span>
+      </div>
+      <span class="secured-label">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+            d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
+        </svg>
+        Paiement sécurisé
+      </span>
+    </div>
+
   </div>
+</div>
 
-  <br>
-
-  <%= submit_tag "Vérifier le paiement" %>
-
-<% end %>
-
-<% if flash[:alert] %>
-  <p style="color:red"><%= flash[:alert] %></p>
-<% end %>
+<script>
+  // Auto-uppercase reference input
+  const refInput = document.getElementById('reference');
+  if (refInput) {
+    refInput.addEventListener('input', function () {
+      const pos = this.selectionStart;
+      this.value = this.value.toUpperCase();
+      this.setSelectionRange(pos, pos);
+    });
+  }
+</script>

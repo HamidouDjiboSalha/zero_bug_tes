@@ -5,12 +5,331 @@
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <%= csrf_meta_tags %>
     <%= csp_meta_tag %>
-
+    <%# <%= stylesheet_link_tag "tailwind", "data-turbo-track": "reload" %> 
     <%= stylesheet_link_tag "application", "data-turbo-track": "reload" %>
     <%= javascript_importmap_tags %>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+      :root {
+        --lime: #8dc63f;
+        --lime-dark: #6fa32e;
+        --lime-light: #a8d85a;
+        --lime-muted: #e8f5d0;
+        --charcoal: #1c1f26;
+        --slate: #2e3340;
+        --muted: #6b7280;
+        --border: #e5e7eb;
+        --surface: #f8faf5;
+      }
+
+      * { font-family: 'Outfit', sans-serif; }
+
+      body {
+        background: var(--surface);
+        min-height: 100vh;
+      }
+
+      /* Sidebar */
+      .sidebar {
+        width: 260px;
+        min-height: 100vh;
+        background: var(--charcoal);
+        position: fixed;
+        top: 0; left: 0;
+        display: flex;
+        flex-direction: column;
+        z-index: 50;
+      }
+
+      .sidebar-logo {
+        padding: 28px 24px 20px;
+        border-bottom: 1px solid rgba(255,255,255,0.07);
+      }
+
+      .logo-mark {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+
+      .logo-i {
+        width: 36px; height: 36px;
+        background: var(--lime);
+        border-radius: 10px;
+        display: flex; align-items: center; justify-content: center;
+        font-weight: 700; font-size: 18px; color: white;
+      }
+
+      .logo-text {
+        font-size: 22px;
+        font-weight: 600;
+        color: white;
+        letter-spacing: -0.3px;
+      }
+
+      .logo-text span { color: var(--lime); }
+
+      .sidebar-section {
+        padding: 20px 16px 8px;
+      }
+
+      .sidebar-label {
+        font-size: 10px;
+        font-weight: 600;
+        letter-spacing: 1.5px;
+        text-transform: uppercase;
+        color: rgba(255,255,255,0.3);
+        padding: 0 8px;
+        margin-bottom: 6px;
+      }
+
+      .nav-link {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 10px 12px;
+        border-radius: 10px;
+        color: rgba(255,255,255,0.6);
+        text-decoration: none;
+        font-size: 14px;
+        font-weight: 500;
+        transition: all 0.15s ease;
+        margin-bottom: 2px;
+      }
+
+      .nav-link:hover {
+        background: rgba(141, 198, 63, 0.1);
+        color: var(--lime-light);
+      }
+
+      .nav-link.active {
+        background: var(--lime);
+        color: white;
+      }
+
+      .nav-link svg {
+        width: 17px; height: 17px;
+        flex-shrink: 0;
+        opacity: 0.8;
+      }
+
+      .nav-link.active svg { opacity: 1; }
+
+      .sidebar-footer {
+        margin-top: auto;
+        padding: 16px;
+        border-top: 1px solid rgba(255,255,255,0.07);
+      }
+
+      .logout-btn {
+        width: 100%;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 10px 12px;
+        border-radius: 10px;
+        color: rgba(255,255,255,0.5);
+        font-size: 14px;
+        font-weight: 500;
+        background: transparent;
+        border: none;
+        cursor: pointer;
+        transition: all 0.15s;
+      }
+
+      .logout-btn:hover {
+        background: rgba(239,68,68,0.12);
+        color: #f87171;
+      }
+
+      /* Main */
+      .main-wrapper {
+        margin-left: 260px;
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+      }
+
+      .topbar {
+        background: white;
+        border-bottom: 1px solid var(--border);
+        padding: 0 32px;
+        height: 64px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        position: sticky; top: 0; z-index: 40;
+      }
+
+      .topbar-title {
+        font-size: 16px;
+        font-weight: 600;
+        color: var(--charcoal);
+      }
+
+      .flash-bar {
+        margin: 20px 32px 0;
+      }
+
+      .flash-notice {
+        background: var(--lime-muted);
+        border: 1px solid var(--lime);
+        color: var(--lime-dark);
+        padding: 10px 16px;
+        border-radius: 10px;
+        font-size: 13.5px;
+        font-weight: 500;
+      }
+
+      .flash-alert {
+        background: #fef2f2;
+        border: 1px solid #fca5a5;
+        color: #dc2626;
+        padding: 10px 16px;
+        border-radius: 10px;
+        font-size: 13.5px;
+        font-weight: 500;
+      }
+
+      .page-content {
+        padding: 28px 32px;
+        flex: 1;
+      }
+
+      /* Badge pill for user role */
+      .role-badge {
+        background: var(--lime-muted);
+        color: var(--lime-dark);
+        font-size: 11px;
+        font-weight: 600;
+        padding: 3px 10px;
+        border-radius: 99px;
+        letter-spacing: 0.3px;
+      }
+
+      .user-info {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+
+      .avatar {
+        width: 34px; height: 34px;
+        border-radius: 10px;
+        background: var(--lime);
+        display: flex; align-items: center; justify-content: center;
+        font-size: 13px; font-weight: 700; color: white;
+      }
+    </style>
   </head>
 
   <body>
-    <%= yield %>
+
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+      <div class="sidebar-logo">
+        <div class="logo-mark">
+          <div class="logo-i">i</div>
+          <span class="logo-text"><span>i</span>money</span>
+        </div>
+      </div>
+
+      <div class="sidebar-section" style="flex:1; overflow-y:auto;">
+
+        <!-- Always visible -->
+        <div class="sidebar-label">Principal</div>
+        <%= link_to dashboard_path, class: "nav-link" do %>
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
+          Dashboard
+        <% end %>
+
+        <% if user_signed_in? && (current_user.admin? || current_user.agent? || current_user.superviseur?) %>
+          <div class="sidebar-label" style="margin-top:14px;">Transactions</div>
+
+          <%= link_to new_deposit_path, class: "nav-link" do %>
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+            Nouveau dépôt
+          <% end %>
+
+          <%= link_to new_withdrawal_path, class: "nav-link" do %>
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4"/></svg>
+            Nouveau retrait
+          <% end %>
+
+          <%= link_to deposits_path, class: "nav-link" do %>
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
+            Historique dépôts
+          <% end %>
+
+          <%= link_to withdrawals_path, class: "nav-link" do %>
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
+            Historique retraits
+          <% end %>
+        <% end %>
+
+        <% if user_signed_in? && (current_user.admin? || current_user.superviseur?) %>
+          <div class="sidebar-label" style="margin-top:14px;">Administration</div>
+
+          <%= link_to supervisions_path, class: "nav-link" do %>
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
+            Supervision
+          <% end %>
+
+          <%= link_to transactions_path, class: "nav-link" do %>
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+            Journal / Historique
+          <% end %>
+        <% end %>
+
+      </div>
+
+      <% if user_signed_in? %>
+        <div class="sidebar-footer">
+          <%= button_to destroy_user_session_path, method: :delete, class: "logout-btn" do %>
+            <svg style="width:17px;height:17px;flex-shrink:0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
+            Déconnexion
+          <% end %>
+        </div>
+      <% end %>
+    </aside>
+
+    <!-- MAIN AREA -->
+    <div class="main-wrapper">
+
+      <!-- Top bar -->
+      <header class="topbar">
+        <span class="topbar-title">
+          <% # You can set @page_title in each controller action %>
+          <%= content_for?(:page_title) ? yield(:page_title) : "Dashboard" %>
+        </span>
+
+        <% if user_signed_in? %>
+          <div class="user-info">
+            <% role_label = current_user.admin? ? "Admin" : current_user.superviseur? ? "Superviseur" : current_user.agent? ? "Agent" : "Utilisateur" %>
+            <span class="role-badge"><%= role_label %></span>
+            <div class="avatar"><%= current_user.email.first.upcase %></div>
+          </div>
+        <% end %>
+      </header>
+
+      <!-- Flash messages -->
+      <% if notice.present? || alert.present? %>
+        <div class="flash-bar">
+          <% if notice.present? %>
+            <div class="flash-notice"><%= notice %></div>
+          <% end %>
+          <% if alert.present? %>
+            <div class="flash-alert"><%= alert %></div>
+          <% end %>
+        </div>
+      <% end %>
+
+      <!-- Page content -->
+      <main class="page-content">
+        <%= yield %>
+      </main>
+
+    </div>
+
   </body>
 </html>

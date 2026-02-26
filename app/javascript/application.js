@@ -2,4 +2,5 @@
 import "@hotwired/turbo-rails"
 import "controllers"
 // Rails UJS ou Turbo doit être actif pour que method: :delete fonctionne depuis un lien <a>
-import "@rails/ujs"
+import Rails from "@rails/ujs"
+Rails.start()

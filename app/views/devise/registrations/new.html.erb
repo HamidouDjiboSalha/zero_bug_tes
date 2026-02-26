@@ -1,34 +1,257 @@
-<h2>Sign up</h2>
+<style>
+  :root {
+    --lime: #8dc63f;
+    --lime-dark: #6fa32e;
+    --lime-light: #a8d85a;
+    --lime-muted: #e8f5d0;
+    --charcoal: #1c1f26;
+  }
 
-<%= form_for(resource, as: resource_name, url: registration_path(resource_name)) do |f| %>
-  <%= render "devise/shared/error_messages", resource: resource %>
+  .auth-wrapper {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #f8faf5;
+    font-family: 'Outfit', sans-serif;
+    padding: 24px;
+  }
 
-  <div class="field">
-    <p><%= f.label :email %></p>
-    <p><%= f.email_field :email, autofocus: true, autocomplete: "email" %></p>
+  .auth-card {
+    background: white;
+    border-radius: 20px;
+    box-shadow: 0 4px 40px rgba(28,31,38,0.08);
+    width: 100%;
+    max-width: 420px;
+    overflow: hidden;
+  }
+
+  .auth-header {
+    background: var(--charcoal);
+    padding: 32px 36px 28px;
+    text-align: center;
+  }
+
+  .auth-logo {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 20px;
+  }
+
+  .auth-logo-i {
+    width: 36px; height: 36px;
+    background: var(--lime);
+    border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 700; font-size: 18px; color: white;
+  }
+
+  .auth-logo-text {
+    font-size: 22px;
+    font-weight: 600;
+    color: white;
+  }
+
+  .auth-logo-text span { color: var(--lime); }
+
+  .auth-header h2 {
+    color: white;
+    font-size: 20px;
+    font-weight: 600;
+    margin: 0;
+    letter-spacing: -0.3px;
+  }
+
+  .auth-header p {
+    color: rgba(255,255,255,0.5);
+    font-size: 13.5px;
+    margin: 6px 0 0;
+  }
+
+  .auth-body {
+    padding: 32px 36px 28px;
+  }
+
+  .form-group {
+    margin-bottom: 18px;
+  }
+
+  .form-group label {
+    display: block;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--charcoal);
+    margin-bottom: 7px;
+    letter-spacing: 0.1px;
+  }
+
+  .form-hint {
+    font-size: 11.5px;
+    color: #9ca3af;
+    margin: -4px 0 8px;
+    font-style: italic;
+  }
+
+  .form-group input[type="email"],
+  .form-group input[type="password"],
+  .form-group input[type="text"] {
+    width: 100%;
+    padding: 11px 14px;
+    border: 1.5px solid #e5e7eb;
+    border-radius: 10px;
+    font-size: 14px;
+    font-family: 'Outfit', sans-serif;
+    color: var(--charcoal);
+    background: #fafafa;
+    transition: border-color 0.15s, box-shadow 0.15s, background 0.15s;
+    box-sizing: border-box;
+    outline: none;
+  }
+
+  .form-group input:focus {
+    border-color: var(--lime);
+    background: white;
+    box-shadow: 0 0 0 3px rgba(141,198,63,0.15);
+  }
+
+  .form-divider {
+    height: 1px;
+    background: #f0f0f0;
+    margin: 22px 0;
+  }
+
+  .submit-btn {
+    width: 100%;
+    padding: 13px;
+    background: var(--lime);
+    color: white;
+    border: none;
+    border-radius: 12px;
+    font-size: 15px;
+    font-weight: 600;
+    font-family: 'Outfit', sans-serif;
+    cursor: pointer;
+    transition: background 0.15s, transform 0.1s, box-shadow 0.15s;
+    letter-spacing: 0.2px;
+    box-shadow: 0 4px 14px rgba(141,198,63,0.35);
+  }
+
+  .submit-btn:hover {
+    background: var(--lime-dark);
+    box-shadow: 0 6px 18px rgba(141,198,63,0.4);
+    transform: translateY(-1px);
+  }
+
+  .submit-btn:active {
+    transform: translateY(0);
+  }
+
+  .auth-footer {
+    padding: 0 36px 28px;
+    text-align: center;
+  }
+
+  .auth-footer a {
+    color: var(--lime-dark);
+    font-size: 13.5px;
+    text-decoration: none;
+    font-weight: 500;
+  }
+
+  .auth-footer a:hover {
+    text-decoration: underline;
+  }
+
+  /* Error messages */
+  #error_explanation {
+    background: #fef2f2;
+    border: 1.5px solid #fca5a5;
+    border-radius: 10px;
+    padding: 12px 16px;
+    margin-bottom: 20px;
+  }
+
+  #error_explanation h2 {
+    color: #dc2626;
+    font-size: 13px;
+    font-weight: 600;
+    margin: 0 0 8px;
+  }
+
+  #error_explanation ul {
+    margin: 0;
+    padding-left: 18px;
+  }
+
+  #error_explanation ul li {
+    color: #dc2626;
+    font-size: 12.5px;
+    margin-bottom: 3px;
+  }
+
+  /* PIN field special */
+  .pin-field input {
+    letter-spacing: 4px;
+    font-size: 18px;
+    font-weight: 600;
+    text-align: center;
+  }
+</style>
+
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+<div class="auth-wrapper">
+  <div class="auth-card">
+
+    <div class="auth-header">
+      <div class="auth-logo">
+        <div class="auth-logo-i">i</div>
+        <span class="auth-logo-text"><span>i</span>money</span>
+      </div>
+      <h2>Créer un compte</h2>
+      <p>Remplissez les informations ci-dessous</p>
+    </div>
+
+    <div class="auth-body">
+      <%= form_for(resource, as: resource_name, url: registration_path(resource_name)) do |f| %>
+        <%= render "devise/shared/error_messages", resource: resource %>
+
+        <div class="form-group">
+          <%= f.label :email, "Adresse e-mail" %>
+          <%= f.email_field :email, autofocus: true, autocomplete: "email", placeholder: "exemple@email.com" %>
+        </div>
+
+        <div class="form-group">
+          <%= f.label :password, "Mot de passe" %>
+          <% if @minimum_password_length %>
+            <div class="form-hint">Minimum <%= @minimum_password_length %> caractères</div>
+          <% end %>
+          <%= f.password_field :password, autocomplete: "new-password", placeholder: "••••••••" %>
+        </div>
+
+        <div class="form-group">
+          <%= f.label :password_confirmation, "Confirmer le mot de passe" %>
+          <%= f.password_field :password_confirmation, autocomplete: "new-password", placeholder: "••••••••" %>
+        </div>
+
+        <div class="form-divider"></div>
+
+        <div class="form-group pin-field">
+          <%= f.label :pin, "Code PIN" %>
+          <div class="form-hint">Code secret à 4 chiffres pour vos opérations</div>
+          <%= f.text_field :pin, placeholder: "••••", maxlength: 4, inputmode: "numeric" %>
+        </div>
+
+        <div class="actions" style="margin-top:24px;">
+          <%= f.submit "Créer mon compte", class: "submit-btn" %>
+        </div>
+      <% end %>
+    </div>
+
+    <div class="auth-footer">
+      <%= render "devise/shared/links" %>
+    </div>
+
   </div>
-
-  <div class="field">
-    <p><%= f.label :password %></p>
-    <% if @minimum_password_length %>
-      <p><em>(<%= @minimum_password_length %> characters minimum)</em></p>
-    <% end %>
-    <p><%= f.password_field :password, autocomplete: "new-password" %></p>
-  </div>
-
-  <div class="field">
-    <p><%= f.label :password_confirmation %></p>
-    <p><%= f.password_field :password_confirmation, autocomplete: "new-password" %></p>
-  </div>
-
-  <div class="field">
-    <%= f.label :pin %><br />
-    <%= f.text_field :pin, autofocus: true %>
-  </div>
-
-  <div class="actions">
-    <%= f.submit "Sign up" %>
-  </div>
-<% end %>
-
-<%= render "devise/shared/links" %>
+</div>

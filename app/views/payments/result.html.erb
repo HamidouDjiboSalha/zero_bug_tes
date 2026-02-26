@@ -1,32 +1,385 @@
-<h2>Résultat du paiement</h2>
+<style>
+  :root {
+    --lime: #8dc63f;
+    --lime-dark: #6fa32e;
+    --lime-muted: #e8f5d0;
+    --amber: #f59e0b;
+    --amber-dark: #d97706;
+    --amber-muted: #fef3c7;
+    --red: #ef4444;
+    --red-dark: #dc2626;
+    --red-muted: #fef2f2;
+    --charcoal: #1c1f26;
+  }
+  body { font-family: 'Outfit', sans-serif; }
 
-<table border="1" cellpadding="10">
-  <tr>
-    <th>Référence</th>
-    <td><%= @payment.reference %></td>
-  </tr>
+  .result-wrapper {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #f8faf5;
+    padding: 24px;
+  }
 
-  <tr>
-    <th>Montant</th>
-    <td><%= @payment.amount %> FCFA</td>
-  </tr>
+  .result-card {
+    background: white;
+    border-radius: 20px;
+    box-shadow: 0 4px 40px rgba(28,31,38,0.09);
+    width: 100%;
+    max-width: 460px;
+    overflow: hidden;
+  }
 
-  <tr>
-    <th>Statut</th>
-    <td><%= @payment.status %></td>
-  </tr>
+  /* ── Status header (dynamic color) ── */
+  .card-header {
+    padding: 28px 32px 24px;
+    text-align: center;
+    position: relative;
+  }
 
-  <tr>
-    <th>Expéditeur</th>
-    <td><%= @payment.sender %></td>
-  </tr>
+  .card-header.validated { background: linear-gradient(135deg, #1c1f26 0%, #2a3a1a 100%); }
+  .card-header.pending   { background: linear-gradient(135deg, #1c1f26 0%, #2d2510 100%); }
+  .card-header.rejected  { background: linear-gradient(135deg, #1c1f26 0%, #2d1010 100%); }
+  .card-header.default   { background: var(--charcoal); }
 
-  <tr>
-    <th>Destinataire</th>
-    <td><%= @payment.receiver %></td>
-  </tr>
-</table>
+  .status-icon-wrap {
+    width: 62px; height: 62px;
+    border-radius: 18px;
+    display: flex; align-items: center; justify-content: center;
+    margin: 0 auto 14px;
+  }
 
-<br>
+  .status-icon-wrap.validated { background: var(--lime); box-shadow: 0 6px 20px rgba(141,198,63,0.4); }
+  .status-icon-wrap.pending   { background: var(--amber); box-shadow: 0 6px 20px rgba(245,158,11,0.4); }
+  .status-icon-wrap.rejected  { background: var(--red); box-shadow: 0 6px 20px rgba(239,68,68,0.4); }
+  .status-icon-wrap.default   { background: #4b5563; }
 
-<%= link_to "Nouvelle recherche", payment_check_path %>
+  .status-icon-wrap svg { width: 30px; height: 30px; color: white; }
+
+  .card-header h2 {
+    color: white;
+    font-size: 18px;
+    font-weight: 700;
+    margin: 0 0 6px;
+    letter-spacing: -0.3px;
+  }
+
+  .status-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 5px 14px;
+    border-radius: 99px;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+  }
+
+  .status-pill::before {
+    content: '';
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    animation: pulse 1.8s infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.4; }
+  }
+
+  .pill-validated { background: rgba(141,198,63,0.18); color: var(--lime-light, #a8d85a); }
+  .pill-validated::before { background: var(--lime); }
+  .pill-pending   { background: rgba(245,158,11,0.18); color: #fcd34d; }
+  .pill-pending::before { background: var(--amber); }
+  .pill-rejected  { background: rgba(239,68,68,0.18); color: #fca5a5; }
+  .pill-rejected::before { background: var(--red); animation: none; }
+  .pill-default   { background: rgba(255,255,255,0.1); color: rgba(255,255,255,0.6); }
+  .pill-default::before { background: #9ca3af; animation: none; }
+
+  /* ── Amount highlight ── */
+  .amount-section {
+    margin: 0;
+    padding: 20px 32px;
+    background: #fafdf6;
+    border-bottom: 1.5px solid #f0f0f0;
+    text-align: center;
+  }
+
+  .amount-label {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 1.2px;
+    text-transform: uppercase;
+    color: #9ca3af;
+    margin-bottom: 6px;
+  }
+
+  .amount-value {
+    font-size: 36px;
+    font-weight: 800;
+    color: var(--charcoal);
+    letter-spacing: -1px;
+    line-height: 1;
+  }
+
+  .amount-value span {
+    font-size: 16px;
+    font-weight: 600;
+    color: #9ca3af;
+    margin-left: 6px;
+  }
+
+  /* ── Details grid ── */
+  .details-body { padding: 24px 32px; }
+
+  .detail-row {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    padding: 13px 0;
+    border-bottom: 1px solid #f3f4f6;
+    gap: 16px;
+  }
+
+  .detail-row:last-child { border-bottom: none; }
+
+  .detail-key {
+    font-size: 12px;
+    font-weight: 600;
+    color: #9ca3af;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    white-space: nowrap;
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    flex-shrink: 0;
+  }
+
+  .detail-key svg { width: 14px; height: 14px; }
+
+  .detail-val {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--charcoal);
+    text-align: right;
+    word-break: break-all;
+  }
+
+  .ref-code {
+    font-family: 'Courier New', monospace;
+    font-size: 13px;
+    background: #f3f4f6;
+    padding: 3px 10px;
+    border-radius: 7px;
+    letter-spacing: 1px;
+    color: #374151;
+  }
+
+  /* ── Transfer arrow ── */
+  .transfer-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 16px 0;
+    border-bottom: 1px solid #f3f4f6;
+  }
+
+  .transfer-party {
+    flex: 1;
+    background: #f8faf5;
+    border-radius: 11px;
+    padding: 10px 14px;
+    text-align: center;
+  }
+
+  .transfer-party .party-label {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: #9ca3af;
+    margin-bottom: 4px;
+  }
+
+  .transfer-party .party-value {
+    font-size: 13.5px;
+    font-weight: 700;
+    color: var(--charcoal);
+  }
+
+  .transfer-arrow {
+    width: 32px; height: 32px;
+    background: var(--lime-muted);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+
+  .transfer-arrow svg { width: 15px; height: 15px; color: var(--lime-dark); }
+
+  /* ── CTA ── */
+  .card-footer {
+    padding: 20px 32px 24px;
+    border-top: 1px solid #f3f4f6;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .btn-new-search {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 13px;
+    background: var(--lime);
+    color: white;
+    border-radius: 12px;
+    font-size: 14.5px;
+    font-weight: 700;
+    font-family: 'Outfit', sans-serif;
+    text-decoration: none;
+    transition: background 0.15s, box-shadow 0.15s, transform 0.1s;
+    box-shadow: 0 4px 14px rgba(141,198,63,0.3);
+    letter-spacing: 0.1px;
+  }
+
+  .btn-new-search:hover {
+    background: var(--lime-dark);
+    box-shadow: 0 6px 18px rgba(141,198,63,0.4);
+    transform: translateY(-1px);
+  }
+
+  .btn-new-search svg { width: 17px; height: 17px; }
+
+  .footer-brand {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    margin-top: 4px;
+  }
+
+  .logo-i {
+    width: 22px; height: 22px;
+    background: var(--lime);
+    border-radius: 6px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 11px; font-weight: 700; color: white;
+  }
+
+  .logo-text { font-size: 14px; font-weight: 600; color: var(--charcoal); }
+  .logo-text em { color: var(--lime); font-style: normal; }
+</style>
+
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+<%
+  raw_status = @payment.status.to_s.downcase
+  status_key = case raw_status
+    when "validated", "validé", "valide", "success" then "validated"
+    when "pending", "en attente"                     then "pending"
+    when "rejected", "rejeté", "rejete", "failed"   then "rejected"
+    else "default"
+  end
+
+  status_label = case status_key
+    when "validated" then "Paiement validé"
+    when "pending"   then "En attente"
+    when "rejected"  then "Paiement rejeté"
+    else @payment.status.to_s.humanize
+  end
+
+  pill_class = "pill-#{status_key}"
+  header_class = status_key
+%>
+
+<div class="result-wrapper">
+  <div class="result-card">
+
+    <!-- ── Dynamic header ── -->
+    <div class="card-header <%= header_class %>">
+      <div class="status-icon-wrap <%= status_key %>">
+        <% if status_key == "validated" %>
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/>
+          </svg>
+        <% elsif status_key == "pending" %>
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+          </svg>
+        <% elsif status_key == "rejected" %>
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"/>
+          </svg>
+        <% else %>
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+          </svg>
+        <% end %>
+      </div>
+      <h2>Résultat du paiement</h2>
+      <span class="status-pill <%= pill_class %>"><%= status_label %></span>
+    </div>
+
+    <!-- ── Amount highlight ── -->
+    <div class="amount-section">
+      <div class="amount-label">Montant de la transaction</div>
+      <div class="amount-value">
+        <%= number_with_delimiter(@payment.amount, delimiter: " ") %>
+        <span>FCFA</span>
+      </div>
+    </div>
+
+    <!-- ── Details ── -->
+    <div class="details-body">
+
+      <!-- Reference -->
+      <div class="detail-row">
+        <span class="detail-key">
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 20l4-16m2 16l4-16M6 9h14M4 15h14"/>
+          </svg>
+          Référence
+        </span>
+        <span class="detail-val"><span class="ref-code"><%= @payment.reference %></span></span>
+      </div>
+
+      <!-- Sender → Receiver -->
+      <div class="transfer-row">
+        <div class="transfer-party">
+          <div class="party-label">Expéditeur</div>
+          <div class="party-value"><%= @payment.sender %></div>
+        </div>
+        <div class="transfer-arrow">
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"/>
+          </svg>
+        </div>
+        <div class="transfer-party">
+          <div class="party-label">Destinataire</div>
+          <div class="party-value"><%= @payment.receiver %></div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ── Footer CTA ── -->
+    <div class="card-footer">
+      <%= link_to payment_check_path, class: "btn-new-search" do %>
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+        </svg>
+        Nouvelle recherche
+      <% end %>
+
+      <div class="footer-brand">
+        <div class="logo-i">i</div>
+        <span class="logo-text"><em>i</em>money</span>
+      </div>
+    </div>
+
+  </div>
+</div>

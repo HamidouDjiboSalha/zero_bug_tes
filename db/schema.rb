@@ -10,7 +10,18 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2026_02_26_084732) do
+ActiveRecord::Schema[7.1].define(version: 2026_02_26_112106) do
+  create_table "deposits", force: :cascade do |t|
+    t.string "client_phone"
+    t.integer "amount"
+    t.string "reference"
+    t.string "status"
+    t.integer "user_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["user_id"], name: "index_deposits_on_user_id"
+  end
+
   create_table "payments", force: :cascade do |t|
     t.string "reference"
     t.decimal "amount"
@@ -30,8 +41,22 @@ ActiveRecord::Schema[7.1].define(version: 2026_02_26_084732) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.string "pin"
+    t.string "role"
     t.index ["email"], name: "index_users_on_email", unique: true
     t.index ["reset_password_token"], name: "index_users_on_reset_password_token", unique: true
   end
 
+  create_table "withdrawals", force: :cascade do |t|
+    t.string "client_phone"
+    t.integer "amount"
+    t.string "reference"
+    t.string "status"
+    t.integer "user_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["user_id"], name: "index_withdrawals_on_user_id"
+  end
+
+  add_foreign_key "deposits", "users"
+  add_foreign_key "withdrawals", "users"
 end

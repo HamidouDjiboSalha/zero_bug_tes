@@ -1,0 +1,295 @@
+<% content_for :page_title, "Dashboard" %>
+
+<style>
+  :root {
+    --lime: #8dc63f;
+    --lime-dark: #6fa32e;
+    --lime-muted: #e8f5d0;
+    --charcoal: #1c1f26;
+  }
+
+  body { font-family: 'Outfit', sans-serif; }
+
+  /* ── Stat cards ── */
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 18px;
+    margin-bottom: 32px;
+  }
+
+  .stat-card {
+    background: white;
+    border-radius: 16px;
+    padding: 24px 26px;
+    box-shadow: 0 2px 16px rgba(28,31,38,0.06);
+    border: 1.5px solid #f0f0f0;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .stat-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+    background: var(--lime);
+    border-radius: 16px 16px 0 0;
+  }
+
+  .stat-card.withdrawal::before { background: #f59e0b; }
+
+  .stat-label {
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: #9ca3af;
+  }
+
+  .stat-value {
+    font-size: 28px;
+    font-weight: 700;
+    color: var(--charcoal);
+    letter-spacing: -0.5px;
+    line-height: 1;
+  }
+
+  .stat-currency {
+    font-size: 14px;
+    font-weight: 500;
+    color: #9ca3af;
+    margin-left: 4px;
+  }
+
+  .stat-icon {
+    position: absolute;
+    top: 20px; right: 20px;
+    width: 40px; height: 40px;
+    border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+  }
+
+  .stat-icon.deposit  { background: var(--lime-muted); }
+  .stat-icon.withdrawal { background: #fef3c7; }
+
+  .stat-icon svg { width: 20px; height: 20px; }
+  .stat-icon.deposit svg  { color: var(--lime-dark); }
+  .stat-icon.withdrawal svg { color: #d97706; }
+
+  /* ── Section header ── */
+  .section-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 14px;
+    margin-top: 8px;
+  }
+
+  .section-title {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--charcoal);
+    letter-spacing: -0.2px;
+  }
+
+  .section-badge {
+    font-size: 11px;
+    font-weight: 600;
+    padding: 3px 10px;
+    border-radius: 99px;
+    letter-spacing: 0.3px;
+  }
+
+  .badge-green { background: var(--lime-muted); color: var(--lime-dark); }
+  .badge-amber { background: #fef3c7; color: #d97706; }
+
+  /* ── Table ── */
+  .table-wrap {
+    background: white;
+    border-radius: 16px;
+    box-shadow: 0 2px 16px rgba(28,31,38,0.06);
+    border: 1.5px solid #f0f0f0;
+    overflow: hidden;
+    margin-bottom: 28px;
+  }
+
+  .data-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13.5px;
+  }
+
+  .data-table thead {
+    background: #f8faf5;
+    border-bottom: 1.5px solid #e8f5d0;
+  }
+
+  .data-table thead th {
+    padding: 12px 18px;
+    text-align: left;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: #9ca3af;
+    white-space: nowrap;
+  }
+
+  .data-table tbody tr {
+    border-bottom: 1px solid #f3f4f6;
+    transition: background 0.1s;
+  }
+
+  .data-table tbody tr:last-child { border-bottom: none; }
+  .data-table tbody tr:hover { background: #fafdf6; }
+
+  .data-table td {
+    padding: 13px 18px;
+    color: var(--charcoal);
+    vertical-align: middle;
+  }
+
+  .td-date { color: #6b7280; font-size: 13px; white-space: nowrap; }
+  .td-phone {
+    font-weight: 600;
+    display: flex; align-items: center; gap: 8px;
+  }
+
+  .phone-avatar {
+    width: 30px; height: 30px;
+    border-radius: 8px;
+    background: var(--lime-muted);
+    color: var(--lime-dark);
+    font-size: 12px; font-weight: 700;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+
+  .td-amount { font-weight: 700; font-size: 14px; white-space: nowrap; }
+  .amount-deposit  { color: var(--lime-dark); }
+  .amount-withdraw { color: #d97706; }
+
+  .empty-state {
+    padding: 36px;
+    text-align: center;
+    color: #9ca3af;
+    font-size: 14px;
+  }
+</style>
+
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+<!-- ── KPI Cards ── -->
+<div class="stats-grid">
+
+  <div class="stat-card">
+    <div class="stat-icon deposit">
+      <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+          d="M12 4v16m8-8H4"/>
+      </svg>
+    </div>
+    <div class="stat-label">Total Dépôts</div>
+    <div class="stat-value">
+      <%= number_with_delimiter(@total_deposits, delimiter: " ") %>
+      <span class="stat-currency">FCFA</span>
+    </div>
+  </div>
+
+  <div class="stat-card withdrawal">
+    <div class="stat-icon withdrawal">
+      <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+          d="M20 12H4"/>
+      </svg>
+    </div>
+    <div class="stat-label">Total Retraits</div>
+    <div class="stat-value">
+      <%= number_with_delimiter(@total_withdrawals, delimiter: " ") %>
+      <span class="stat-currency">FCFA</span>
+    </div>
+  </div>
+
+</div>
+
+<!-- ── Dépôts validés ── -->
+<div class="section-header">
+  <span class="section-title">Dépôts validés</span>
+  <span class="section-badge badge-green"><%= @validated_deposits.size %> entrées</span>
+</div>
+
+<div class="table-wrap">
+  <% if @validated_deposits.any? %>
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Date</th>
+          <th>Client</th>
+          <th>Montant</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% @validated_deposits.each do |d| %>
+          <tr>
+            <td class="td-date"><%= d.created_at.strftime("%d/%m/%Y %H:%M") %></td>
+            <td>
+              <div class="td-phone">
+                <div class="phone-avatar"><%= d.client_phone.to_s.first %></div>
+                <%= d.client_phone %>
+              </div>
+            </td>
+            <td class="td-amount amount-deposit">
+              + <%= number_with_delimiter(d.amount, delimiter: " ") %> FCFA
+            </td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  <% else %>
+    <div class="empty-state">Aucun dépôt validé pour le moment.</div>
+  <% end %>
+</div>
+
+<!-- ── Retraits validés ── -->
+<div class="section-header">
+  <span class="section-title">Retraits validés</span>
+  <span class="section-badge badge-amber"><%= @validated_withdrawals.size %> entrées</span>
+</div>
+
+<div class="table-wrap">
+  <% if @validated_withdrawals.any? %>
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Date</th>
+          <th>Client</th>
+          <th>Montant</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% @validated_withdrawals.each do |w| %>
+          <tr>
+            <td class="td-date"><%= w.created_at.strftime("%d/%m/%Y %H:%M") %></td>
+            <td>
+              <div class="td-phone">
+                <div class="phone-avatar" style="background:#fef3c7;color:#d97706;">
+                  <%= w.client_phone.to_s.first %>
+                </div>
+                <%= w.client_phone %>
+              </div>
+            </td>
+            <td class="td-amount amount-withdraw">
+              − <%= number_with_delimiter(w.amount, delimiter: " ") %> FCFA
+            </td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  <% else %>
+    <div class="empty-state">Aucun retrait validé pour le moment.</div>
+  <% end %>
+</div>

@@ -1,6 +1,387 @@
-<h1>Bienvenue</h1>
+<% content_for :page_title, "Bienvenue" %>
 
-<p>Email : <%= current_user.email %></p>
-<p>PIN : <%= current_user.pin %></p>
+<style>
+  :root {
+    --lime: #8dc63f;
+    --lime-dark: #6fa32e;
+    --lime-muted: #e8f5d0;
+    --charcoal: #1c1f26;
+  }
+  body { font-family: 'Outfit', sans-serif; }
 
-<%= button_to "Déconnexion", destroy_user_session_path, method: :delete %>
+  /* ── Hero welcome banner ── */
+  .welcome-banner {
+    background: var(--charcoal);
+    border-radius: 18px;
+    padding: 28px 32px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+    margin-bottom: 24px;
+    overflow: hidden;
+    position: relative;
+  }
+
+  .welcome-banner::before {
+    content: '';
+    position: absolute;
+    top: -40px; right: -40px;
+    width: 200px; height: 200px;
+    background: radial-gradient(circle, rgba(141,198,63,0.15) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  .welcome-left { flex: 1; }
+
+  .welcome-greeting {
+    font-size: 13px;
+    font-weight: 600;
+    color: rgba(255,255,255,0.45);
+    letter-spacing: 0.5px;
+    margin-bottom: 6px;
+  }
+
+  .welcome-name {
+    font-size: 22px;
+    font-weight: 800;
+    color: white;
+    letter-spacing: -0.5px;
+    margin-bottom: 10px;
+  }
+
+  .welcome-name span { color: var(--lime); }
+
+  .role-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(141,198,63,0.15);
+    border: 1px solid rgba(141,198,63,0.3);
+    color: var(--lime);
+    font-size: 11.5px;
+    font-weight: 700;
+    padding: 5px 12px;
+    border-radius: 99px;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+  }
+
+  .role-badge svg { width: 13px; height: 13px; }
+
+  .welcome-avatar {
+    width: 64px; height: 64px;
+    background: var(--lime);
+    border-radius: 18px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 26px;
+    font-weight: 800;
+    color: white;
+    flex-shrink: 0;
+    box-shadow: 0 6px 20px rgba(141,198,63,0.4);
+    letter-spacing: -1px;
+  }
+
+  /* ── Cards grid ── */
+  .info-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 16px;
+    margin-bottom: 24px;
+  }
+
+  .info-card {
+    background: white;
+    border-radius: 16px;
+    padding: 20px 22px;
+    box-shadow: 0 2px 16px rgba(28,31,38,0.06);
+    border: 1.5px solid #f0f0f0;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+
+  .info-card-icon {
+    width: 42px; height: 42px;
+    border-radius: 12px;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+
+  .icon-email { background: #eff6ff; }
+  .icon-email svg { color: #3b82f6; }
+  .icon-pin   { background: var(--lime-muted); }
+  .icon-pin svg { color: var(--lime-dark); }
+
+  .info-card-icon svg { width: 20px; height: 20px; }
+
+  .info-card-body { flex: 1; min-width: 0; }
+
+  .info-card-label {
+    font-size: 11px;
+    font-weight: 700;
+    color: #9ca3af;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    margin-bottom: 5px;
+  }
+
+  .info-card-value {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--charcoal);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  /* PIN masking */
+  .pin-wrap {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .pin-dots {
+    display: flex;
+    gap: 6px;
+  }
+
+  .pin-dot {
+    width: 10px; height: 10px;
+    background: var(--charcoal);
+    border-radius: 50%;
+  }
+
+  .pin-toggle {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 3px;
+    color: #9ca3af;
+    transition: color 0.15s;
+    display: flex; align-items: center;
+  }
+
+  .pin-toggle:hover { color: var(--lime-dark); }
+  .pin-toggle svg { width: 16px; height: 16px; }
+
+  .pin-value {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--charcoal);
+    letter-spacing: 4px;
+    display: none;
+    font-family: 'Courier New', monospace;
+  }
+
+  /* ── Quick actions ── */
+  .section-title {
+    font-size: 13px;
+    font-weight: 700;
+    color: #9ca3af;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    margin-bottom: 12px;
+  }
+
+  .actions-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 12px;
+  }
+
+  .action-card {
+    background: white;
+    border: 1.5px solid #f0f0f0;
+    border-radius: 14px;
+    padding: 16px 18px;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    transition: border-color 0.15s, box-shadow 0.15s, transform 0.12s;
+    box-shadow: 0 2px 8px rgba(28,31,38,0.04);
+  }
+
+  .action-card:hover {
+    border-color: var(--lime);
+    box-shadow: 0 4px 16px rgba(141,198,63,0.15);
+    transform: translateY(-2px);
+  }
+
+  .action-icon {
+    width: 36px; height: 36px;
+    border-radius: 10px;
+    background: var(--lime-muted);
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+
+  .action-icon svg { width: 17px; height: 17px; color: var(--lime-dark); }
+
+  .action-label {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--charcoal);
+  }
+
+  .action-sub {
+    font-size: 11px;
+    color: #9ca3af;
+    margin-top: 2px;
+  }
+</style>
+
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+<%
+  role_label = if current_user.admin?
+    "Administrateur"
+  elsif current_user.superviseur?
+    "Superviseur"
+  elsif current_user.agent?
+    "Agent"
+  else
+    "Utilisateur"
+  end
+%>
+
+<!-- ── Welcome banner ── -->
+<div class="welcome-banner">
+  <div class="welcome-left">
+    <div class="welcome-greeting">Bon retour 👋</div>
+    <div class="welcome-name">
+      <span><%= current_user.email.split("@").first.capitalize %></span>
+    </div>
+    <div class="role-badge">
+      <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+          d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
+      </svg>
+      <%= role_label %>
+    </div>
+  </div>
+  <div class="welcome-avatar">
+    <%= current_user.email.first.upcase %>
+  </div>
+</div>
+
+<!-- ── Account info ── -->
+<div class="info-grid">
+
+  <!-- Email -->
+  <div class="info-card">
+    <div class="info-card-icon icon-email">
+      <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+          d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+      </svg>
+    </div>
+    <div class="info-card-body">
+      <div class="info-card-label">Adresse e-mail</div>
+      <div class="info-card-value" title="<%= current_user.email %>">
+        <%= current_user.email %>
+      </div>
+    </div>
+  </div>
+
+  <!-- PIN -->
+  <div class="info-card">
+    <div class="info-card-icon icon-pin">
+      <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+          d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
+      </svg>
+    </div>
+    <div class="info-card-body">
+      <div class="info-card-label">Code PIN</div>
+      <div class="pin-wrap">
+        <div class="pin-dots" id="pin-dots">
+          <% current_user.pin.to_s.length.times do %>
+            <div class="pin-dot"></div>
+          <% end %>
+        </div>
+        <div class="pin-value" id="pin-value"><%= current_user.pin %></div>
+        <button class="pin-toggle" id="pin-toggle" title="Afficher/masquer le PIN">
+          <svg id="eye-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ── Quick actions ── -->
+<% if current_user.admin? || current_user.agent? || current_user.superviseur? %>
+  <div class="section-title">Accès rapide</div>
+  <div class="actions-grid">
+
+    <% if current_user.admin? || current_user.agent? || current_user.superviseur? %>
+      <%= link_to new_deposit_path, class: "action-card" do %>
+        <div class="action-icon">
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+          </svg>
+        </div>
+        <div>
+          <div class="action-label">Nouveau dépôt</div>
+          <div class="action-sub">Enregistrer un dépôt</div>
+        </div>
+      <% end %>
+
+      <%= link_to new_withdrawal_path, class: "action-card" do %>
+        <div class="action-icon" style="background:#fef3c7;">
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style="color:#d97706;">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4"/>
+          </svg>
+        </div>
+        <div>
+          <div class="action-label">Nouveau retrait</div>
+          <div class="action-sub">Traiter un retrait</div>
+        </div>
+      <% end %>
+    <% end %>
+
+    <% if current_user.admin? || current_user.superviseur? %>
+      <%= link_to supervisions_path, class: "action-card" do %>
+        <div class="action-icon" style="background:#eff6ff;">
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style="color:#3b82f6;">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
+          </svg>
+        </div>
+        <div>
+          <div class="action-label">Supervision</div>
+          <div class="action-sub">Valider les opérations</div>
+        </div>
+      <% end %>
+    <% end %>
+
+  </div>
+<% end %>
+
+<script>
+  const toggle   = document.getElementById('pin-toggle');
+  const dots     = document.getElementById('pin-dots');
+  const pinValue = document.getElementById('pin-value');
+  const eyeIcon  = document.getElementById('eye-icon');
+  let visible = false;
+
+  const eyeOpen  = `<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>`;
+  const eyeClosed = `<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21"/>`;
+
+  if (toggle) {
+    toggle.addEventListener('click', () => {
+      visible = !visible;
+      dots.style.display     = visible ? 'none' : 'flex';
+      pinValue.style.display = visible ? 'block' : 'none';
+      eyeIcon.innerHTML      = visible ? eyeClosed : eyeOpen;
+    });
+  }
+</script>

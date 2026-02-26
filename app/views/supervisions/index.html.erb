@@ -1,0 +1,425 @@
+<% content_for :page_title, "Supervision" %>
+
+<style>
+  :root {
+    --lime: #8dc63f;
+    --lime-dark: #6fa32e;
+    --lime-muted: #e8f5d0;
+    --amber: #f59e0b;
+    --amber-dark: #d97706;
+    --amber-muted: #fef3c7;
+    --red: #ef4444;
+    --red-dark: #dc2626;
+    --red-muted: #fef2f2;
+    --charcoal: #1c1f26;
+  }
+  body { font-family: 'Outfit', sans-serif; }
+
+  /* ── Page header ── */
+  .page-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 28px;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+
+  .page-header h1 {
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--charcoal);
+    margin: 0 0 4px;
+    letter-spacing: -0.3px;
+  }
+
+  .page-header p {
+    font-size: 13px;
+    color: #9ca3af;
+    margin: 0;
+  }
+
+  /* ── Summary pills ── */
+  .summary-row {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 28px;
+    flex-wrap: wrap;
+  }
+
+  .summary-pill {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    padding: 10px 16px;
+    border-radius: 12px;
+    font-size: 13px;
+    font-weight: 600;
+    border: 1.5px solid;
+  }
+
+  .summary-pill svg { width: 16px; height: 16px; flex-shrink: 0; }
+
+  .pill-deposit  { background: var(--lime-muted);  border-color: var(--lime);  color: var(--lime-dark); }
+  .pill-withdraw { background: var(--amber-muted); border-color: var(--amber); color: var(--amber-dark); }
+
+  /* ── Section ── */
+  .section { margin-bottom: 32px; }
+
+  .section-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 14px;
+  }
+
+  .section-icon {
+    width: 34px; height: 34px;
+    border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+
+  .section-icon svg { width: 17px; height: 17px; color: white; }
+  .section-icon.deposit   { background: var(--lime); }
+  .section-icon.withdraw  { background: var(--amber); }
+
+  .section-title {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--charcoal);
+  }
+
+  .section-count {
+    font-size: 11px;
+    font-weight: 700;
+    padding: 3px 9px;
+    border-radius: 99px;
+  }
+
+  .count-deposit  { background: var(--lime-muted);  color: var(--lime-dark); }
+  .count-withdraw { background: var(--amber-muted); color: var(--amber-dark); }
+
+  /* ── Table card ── */
+  .table-card {
+    background: white;
+    border-radius: 16px;
+    box-shadow: 0 2px 20px rgba(28,31,38,0.07);
+    border: 1.5px solid #f0f0f0;
+    overflow: hidden;
+  }
+
+  .data-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13.5px;
+  }
+
+  .data-table thead { background: #f8faf5; }
+  .data-table.withdraw thead { background: #fffdf5; }
+
+  .data-table thead th {
+    padding: 11px 18px;
+    text-align: left;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: #9ca3af;
+    white-space: nowrap;
+    border-bottom: 1.5px solid #f0f0f0;
+  }
+
+  .data-table tbody tr {
+    border-bottom: 1px solid #f3f4f6;
+    transition: background 0.1s;
+  }
+
+  .data-table tbody tr:last-child { border-bottom: none; }
+  .data-table tbody tr:hover { background: #fafdf6; }
+  .data-table.withdraw tbody tr:hover { background: #fffdf5; }
+
+  .data-table td {
+    padding: 13px 18px;
+    color: var(--charcoal);
+    vertical-align: middle;
+  }
+
+  .td-date { color: #6b7280; font-size: 12.5px; white-space: nowrap; }
+
+  .td-phone {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    font-weight: 600;
+    white-space: nowrap;
+  }
+
+  .phone-avatar {
+    width: 30px; height: 30px;
+    border-radius: 8px;
+    font-size: 12px; font-weight: 700;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+
+  .avatar-deposit  { background: var(--lime-muted);  color: var(--lime-dark); }
+  .avatar-withdraw { background: var(--amber-muted); color: var(--amber-dark); }
+
+  .td-amount { font-weight: 700; font-size: 14px; white-space: nowrap; }
+  .amount-deposit  { color: var(--lime-dark); }
+  .amount-withdraw { color: var(--amber-dark); }
+
+  /* ── Action buttons ── */
+  .action-cell {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    white-space: nowrap;
+  }
+
+  .btn-approve,
+  .btn-reject {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 7px 14px;
+    border-radius: 8px;
+    font-size: 12.5px;
+    font-weight: 600;
+    font-family: 'Outfit', sans-serif;
+    border: none;
+    cursor: pointer;
+    transition: all 0.15s;
+    letter-spacing: 0.1px;
+  }
+
+  .btn-approve svg,
+  .btn-reject  svg { width: 13px; height: 13px; }
+
+  .btn-approve {
+    background: var(--lime-muted);
+    color: var(--lime-dark);
+    border: 1.5px solid var(--lime);
+  }
+
+  .btn-approve:hover {
+    background: var(--lime);
+    color: white;
+    box-shadow: 0 3px 10px rgba(141,198,63,0.35);
+    transform: translateY(-1px);
+  }
+
+  .btn-reject {
+    background: var(--red-muted);
+    color: var(--red-dark);
+    border: 1.5px solid #fca5a5;
+  }
+
+  .btn-reject:hover {
+    background: var(--red);
+    color: white;
+    box-shadow: 0 3px 10px rgba(239,68,68,0.3);
+    transform: translateY(-1px);
+  }
+
+  /* Override button_to default form margin */
+  .action-cell form { margin: 0; display: inline; }
+
+  /* Empty state */
+  .empty-state {
+    padding: 36px;
+    text-align: center;
+  }
+
+  .empty-icon {
+    width: 48px; height: 48px;
+    background: #f3f4f6;
+    border-radius: 14px;
+    display: flex; align-items: center; justify-content: center;
+    margin: 0 auto 12px;
+  }
+
+  .empty-icon svg { width: 22px; height: 22px; color: #d1d5db; }
+  .empty-state p  { color: #9ca3af; font-size: 13.5px; margin: 0; }
+</style>
+
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+<!-- ── Page header ── -->
+<div class="page-header">
+  <div>
+    <h1>Transactions en attente</h1>
+    <p>Validez ou rejetez les opérations soumises par les agents</p>
+  </div>
+</div>
+
+<!-- ── Summary pills ── -->
+<div class="summary-row">
+  <div class="summary-pill pill-deposit">
+    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+    </svg>
+    <%= @pending_deposits.size %> dépôt<%= @pending_deposits.size > 1 ? "s" : "" %> en attente
+  </div>
+  <div class="summary-pill pill-withdraw">
+    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4"/>
+    </svg>
+    <%= @pending_withdrawals.size %> retrait<%= @pending_withdrawals.size > 1 ? "s" : "" %> en attente
+  </div>
+</div>
+
+<!-- ══════════════════════════════
+     DÉPÔTS EN ATTENTE
+════════════════════════════════ -->
+<div class="section">
+  <div class="section-header">
+    <div class="section-icon deposit">
+      <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+      </svg>
+    </div>
+    <span class="section-title">Dépôts</span>
+    <span class="section-count count-deposit"><%= @pending_deposits.size %></span>
+  </div>
+
+  <div class="table-card">
+    <% if @pending_deposits.any? %>
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Date</th>
+            <th>Client</th>
+            <th>Montant</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% @pending_deposits.each do |d| %>
+            <tr>
+              <td class="td-date"><%= d.created_at.strftime("%d/%m/%Y %H:%M") %></td>
+              <td>
+                <div class="td-phone">
+                  <div class="phone-avatar avatar-deposit"><%= d.client_phone.to_s.first.upcase %></div>
+                  <%= d.client_phone %>
+                </div>
+              </td>
+              <td class="td-amount amount-deposit">
+                + <%= number_with_delimiter(d.amount, delimiter: " ") %> FCFA
+              </td>
+              <td>
+                <div class="action-cell">
+                  <%= button_to approve_supervision_path(d, type: "deposit"),
+                      method: :patch,
+                      form: { data: { turbo_confirm: "Valider ce dépôt ?" } },
+                      class: "btn-approve" do %>
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/>
+                    </svg>
+                    Valider
+                  <% end %>
+                  <%= button_to reject_supervision_path(d, type: "deposit"),
+                      method: :patch,
+                      form: { data: { turbo_confirm: "Rejeter ce dépôt ?" } },
+                      class: "btn-reject" do %>
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"/>
+                    </svg>
+                    Rejeter
+                  <% end %>
+                </div>
+              </td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+    <% else %>
+      <div class="empty-state">
+        <div class="empty-icon">
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+          </svg>
+        </div>
+        <p>Aucun dépôt en attente de validation.</p>
+      </div>
+    <% end %>
+  </div>
+</div>
+
+<!-- ══════════════════════════════
+     RETRAITS EN ATTENTE
+════════════════════════════════ -->
+<div class="section">
+  <div class="section-header">
+    <div class="section-icon withdraw">
+      <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4"/>
+      </svg>
+    </div>
+    <span class="section-title">Retraits</span>
+    <span class="section-count count-withdraw"><%= @pending_withdrawals.size %></span>
+  </div>
+
+  <div class="table-card">
+    <% if @pending_withdrawals.any? %>
+      <table class="data-table withdraw">
+        <thead>
+          <tr>
+            <th>Date</th>
+            <th>Client</th>
+            <th>Montant</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% @pending_withdrawals.each do |w| %>
+            <tr>
+              <td class="td-date"><%= w.created_at.strftime("%d/%m/%Y %H:%M") %></td>
+              <td>
+                <div class="td-phone">
+                  <div class="phone-avatar avatar-withdraw"><%= w.client_phone.to_s.first.upcase %></div>
+                  <%= w.client_phone %>
+                </div>
+              </td>
+              <td class="td-amount amount-withdraw">
+                − <%= number_with_delimiter(w.amount, delimiter: " ") %> FCFA
+              </td>
+              <td>
+                <div class="action-cell">
+                  <%= button_to approve_supervision_path(w, type: "withdrawal"),
+                      method: :patch,
+                      form: { data: { turbo_confirm: "Valider ce retrait ?" } },
+                      class: "btn-approve" do %>
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/>
+                    </svg>
+                    Valider
+                  <% end %>
+                  <%= button_to reject_supervision_path(w, type: "withdrawal"),
+                      method: :patch,
+                      form: { data: { turbo_confirm: "Rejeter ce retrait ?" } },
+                      class: "btn-reject" do %>
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"/>
+                    </svg>
+                    Rejeter
+                  <% end %>
+                </div>
+              </td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+    <% else %>
+      <div class="empty-state">
+        <div class="empty-icon">
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+          </svg>
+        </div>
+        <p>Aucun retrait en attente de validation.</p>
+      </div>
+    <% end %>
+  </div>
+</div>
