@@ -13,7 +13,7 @@ class User < ApplicationRecord
   end
   
   # Validation du PIN
-  validates :pin, presence: true, format: { with: /\A\d{4}\z/, message: "doit contenir exactement 4 chiffres" }
+  validates :pin, presence: true, format: { with: /\A(?!([0-9])\1{3})\d{4}\z/, message: "doit contenir exactement 4 chiffres et ne pas être une répétition (ex: 0000, 1111)" }
 
   # Role USERS
   enum role: {

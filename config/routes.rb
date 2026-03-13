@@ -2,7 +2,7 @@ Rails.application.routes.draw do
   get "payment/check", to: "payments#check"
   post "payment/check", to: "payments#result"
   get 'home/index'
-  get "/imoney/:service", to: "imoney#show", as: :imoney_service
+  
   devise_for :users
   get "/dashboard", to: "dashboard#index"
   resources :deposits, only: [:new, :create, :index]
